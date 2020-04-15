@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE">
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
+	<title>乐优商城--我的订单-关闭订单</title>
+	<link rel="icon" href="/assets/img/favicon.ico">
+		
+	
+    <link rel="stylesheet" type="text/css" href="css/webbase.css" />
+    <link rel="stylesheet" type="text/css" href="css/pages-payfail.css" />
+</head>
+	<body>
+	<!--页面顶部白条条，由js动态加载-->
+	<script type="text/javascript" src="plugins/jquery/jquery.min.js"></script>
+
+	<div id="orderApp">
+		<div class="top">
+			<shortcut/>
+		</div>
+		<div class="cart py-container">
+
+			<!--logoArea-->
+			<div class="logoArea">
+				<div class="fl logo"><span class="title">关闭订单</span></div>
+			</div>
+			<!--主内容-->
+			<div class="payfail">
+				<!--<div class="fail">-->
+					<div class="cart-main">
+						<div class="cart-item-list">
+
+							<div class="cart-body">
+								<div class="cart-list">
+									<ul class="goods-list yui3-g" v-for="(d, i) in order.orderDetails" :key="d.skuId">
+										<li class="yui3-u-10-24">
+											<div class="good-item">
+												<div class="item-img"><a :href="'/item/'+d.spuId+'.html'" target="_blank"><img
+														:src="d.image" width="80px" height="80px"/></a></div>
+												<div class="item-msg">
+												<span>
+													<p v-text="d.title.substring(0, 35) + '...'"></p>
+                                                    <p style="margin-bottom: 0px" v-for="(v,k) in JSON.parse(d.ownSpec)"
+													   :key="k">
+                                                        <span v-text="k"></span> : <span style="color: #BE0000;"
+																						 v-text="v"></span>
+                                                    </p>
+												</span>
+												</div>
+											</div>
+										</li>
+
+										<li class="yui3-u-12-24">
+											<span style="margin-left: 20px">
+												退款原因：<input type="text" v-model="desc"/>
+											</span>
+										</li>
+										<li class="yui3-u-5-12">
+											<span style="margin-left: 500px">
+												<button type="button" style="margin-left: 100px">
+													<a href="#" @click.prevent="closeOrder">提交退款</a>
+												</button>
+											</span>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+
+					</div>
+					<!--<h3><img src="img/_/fail.png" width="48" height="48">支付失败，请稍后再试</h3>-->
+					<!--<div class="fail-text">-->
+					<!--<p>失败原因：不能使用金币购买！</p>-->
+					<!--<p>您可以先去　<a href="index.html" target="_blank">乐优首页</a>　逛逛</p>-->
+					<!--<p class="button"><a href="" class="sui-btn btn-xlarge btn-danger">重新支付</a></p>-->
+				    <!--</div>-->
+				<!--</div>-->
+				
+			</div>
+		</div>
+	</div>
+		
+	<!-- 底部栏位 -->
+	<!--页面底部，由js动态加载-->
+	<div class="clearfix footer"></div>
+	<script type="text/javascript">$(".footer").load("foot.html");</script>
+	<!--页面底部END-->
+	<script src="./js/vue/vue.js"></script>
+	<script src="./js/axios.min.js"></script>
+	<script src="./js/common.js"></script>
+	<script type="text/javascript">
+        var vmClose = new Vue({
+            el: "#orderApp",
+			data: {
+                ly,
+				order: {},
+				desc:"",
+			},
+			created(){
+				// 初始化order
+				this.order = ly.store.get("order");
+			},
+			methods :{
+                closeOrder(){
+                    // 取消订单，确认是否登录
+                    leyou.http.get("/auth/verify").then(
+                        // 发送请求到后台，查询是否可以取消订单、退款
+                        ly.http.get("/order/order/cancel?id=" + this.order.orderId + "&desc=" + this.desc).then(() => {
+							// 退款成功，订单交易关闭，跳转订单查询页面
+							alert("订单关闭成功，已发起退款...")
+							window.location = "http://www.leyou.com/home.html";
+                        }).catch(() => {
+                            alert("订单关闭失败！");
+					})).catch(() => {
+				// 去登录
+				this.gotoLogin();
+                    });
+                },
+			},
+            components: {
+                shortcut: () => import("/js/pages/shortcut.js")
+            }
+        });
+	</script>
+		
+	
+<script type="text/javascript" src="js/plugins/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="js/plugins/jquery.easing/jquery.easing.min.js"></script>
+<script type="text/javascript" src="js/plugins/sui/sui.min.js"></script>
+<script type="text/javascript" src="js/widget/nav.js"></script>
+<!--<script type="text/javascript" src="js/components/ui-modules/nav/nav-portal-top.js"></script>-->
+</body>
+
+</html>

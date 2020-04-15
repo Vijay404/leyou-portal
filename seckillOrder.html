@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE">
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
+	<title>乐优商城--秒杀订单结算页</title>
+
+	<link rel="stylesheet" type="text/css" href="css/webbase.css" />
+	<link rel="stylesheet" type="text/css" href="css/pages-getOrderInfo.css" />
+</head>
+
+<body>
+<!--head-->
+<div id="orderInfoApp">
+	<div class="top">
+		<shortcut />
+	</div>
+
+	<div  class="cart py-container">
+
+		<!--logoArea-->
+		<div class="logoArea">
+			<div class="fl logo"><span class="title">结算页</span></div>
+		</div>
+
+		<!--主内容-->
+		<div class="checkout py-container">
+			<div class="checkout-tit">
+				<h4 class="tit-txt">填写并核对订单信息</h4>
+			</div>
+			<div class="checkout-steps">
+				<!--收件人信息-->
+				<div class="step-tit">
+					<h5>收件人信息<span><a data-toggle="modal" data-target=".edit" data-keyboard="false" class="newadd">新增收货地址</a></span></h5>
+				</div>
+				<div class="form-horizontal">
+					<div>收件人：<input v-model="form.receiver"/></div>
+					<div>地&nbsp&nbsp&nbsp址：<input v-model="form.address"/></div>
+					<div>电&nbsp&nbsp&nbsp话：<input v-model="form.phone"/></div>
+				</div>
+				<div class="hr"></div>
+				<!--支付和送货-->
+				<div class="payshipInfo">
+					<div class="step-tit">
+						<h5>支付方式</h5>
+					</div>
+					<div class="step-cont">
+						<ul class="payType">
+							<li class="selected">微信付款<span title="点击取消选择"></span></li>
+						</ul>
+					</div>
+					<div class="hr"></div>
+					<div class="step-tit">
+						<h5>送货清单</h5>
+					</div>
+					<div class="step-cont">
+						<ul class="send-detail">
+							<li >
+								<div class="sendGoods">
+									<ul class="yui3-g">
+										<li class="yui3-u-1-6">
+											<span><img width="70px" height="70px" :src="seckillGoods.image"/></span>
+										</li>
+										<li class="yui3-u-7-12">
+											<div class="desc" v-text="seckillGoods.title"></div>
+										</li>
+										<li class="yui3-u-1-12">
+											<div class="price">￥{{ly.formatPrice(seckillGoods.seckillPrice)}}</div>
+										</li>
+										<li class="yui3-u-1-12">
+											<div class="num">X1</div>
+										</li>
+
+									</ul>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div class="hr"></div>
+				</div>
+				<div class="linkInfo">
+					<div class="step-tit">
+						<h5>发票信息</h5>
+					</div>
+					<div class="step-cont">
+						<span>普通发票（电子）</span>
+						<span>个人</span>
+						<span>明细</span>
+					</div>
+				</div>
+				<div class="cardInfo">
+					<div class="step-tit">
+						<h5>使用优惠/抵用</h5>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="order-summary">
+			<div class="static fr">
+				<div class="list">
+					<span><i class="number">1</i>件商品，总商品金额</span>
+					<em class="allprice">¥{{ly.formatPrice(seckillGoods.seckillPrice)}}</em>
+				</div>
+				<div class="list">
+					<span>返现：</span>
+					<em class="money">0.00</em>
+				</div>
+				<div class="list">
+					<span>运费：</span>
+					<em class="transport">0.00</em>
+				</div>
+			</div>
+		</div>
+		<div class="clearfix trade">
+			<div class="fc-price">应付金额:　<span class="price">¥{{ly.formatPrice(seckillGoods.seckillPrice)}}</span></div>
+			<div class="fc-receiverInfo">
+				寄送至:上海
+				收货人：{{form.receiver}}
+			</div>
+		</div>
+		<div class="submit">
+			<a class="sui-btn btn-danger btn-xlarge" href="#" @click.prevent="submit">提交订单</a>
+		</div>
+	</div>
+
+</div>
+<script src="./js/vue/vue.js"></script>
+<script src="./js/axios.min.js"></script>
+<script src="./js/common.js"></script>
+<script type="text/javascript">
+    var orderInfoVm = new Vue({
+        el:"#orderInfoApp",
+        data:{
+            ly,
+            paymentType: 1,
+            form:{
+                skuId: "",
+                receiver: "",
+                phone: "",
+                address: "",
+            },
+			seckillGoods: "",
+        },
+        created(){
+            this.seckillGoods = ly.store.get("seckillGoods");
+            this.form.skuId = this.seckillGoods.skuId;
+            // 判断是否登录
+        },
+        methods:{
+            submit(){
+                ly.http.get("/auth/verify").then(() => {
+                    // 提交订单
+                    ly.http.post("/seckill/seck",this.form,{
+                        transformResponse: [function (data) {
+                            return data;
+                        }]}).then(resp=>{
+                        // 跳转到付款页,并传递订单id
+                        window.location.href = "/pay.html?id=" + resp.data;
+                    })
+                }).catch(() => {
+                    window.location.href = "/login.html?returnUrl=" + window.location.href;
+                })
+            },
+        },
+        computed:{
+        },
+        components:{
+            shortcut: () => import("/js/pages/shortcut.js")
+        }
+    });
+</script>
+
+<!-- 底部栏位 -->
+<!--页面底部，由js动态加载-->
+<div class="clearfix footer"></div>
+<script type="text/javascript" src="js/plugins/jquery/jquery.min.js"></script>
+<script type="text/javascript">$(".footer").load("foot.html");</script>
+<!--页面底部END-->
+
+<script type="text/javascript" src="js/plugins/jquery.easing/jquery.easing.min.js"></script>
+<script type="text/javascript" src="js/plugins/sui/sui.min.js"></script>
+<script type="text/javascript" src="js/pages/getOrderInfo.js"></script>
+</body>
+
+</html>
